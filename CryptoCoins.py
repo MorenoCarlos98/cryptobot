@@ -1,10 +1,13 @@
 from bs4 import BeautifulSoup
 from requests_html import HTMLSession
 import time
-import firebase_admin
 from firebase_admin import credentials, firestore
 
-def db_store(db, coins, prices, market_caps, total_exchange_volumes, returns_24h, total_supply, categories, value_proposition):
+def db_store(coins, prices, market_caps, total_exchange_volumes, returns_24h, total_supply, categories, value_proposition):
+    cred = credentials.Certificate("./serviceAccountKey.json")
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
+    
     print('UPDATING VALUES..')
     for i in range(len(coins)):
         data = {"name": coins[i], "price": prices[i], "market_cap": market_caps[i], "total_exchange":total_exchange_volumes[i], "return": returns_24h[i], "total_supply": total_supply[i],"category": categories[i], "value_proposition": value_proposition[i]}
@@ -12,11 +15,6 @@ def db_store(db, coins, prices, market_caps, total_exchange_volumes, returns_24h
     print('ALL UPDATED')    
 
 if __name__ == '__main__':
-    cred = credentials.Certificate("./serviceAccountKey.json")
-    firebase_admin.initialize_app(cred)
-
-    db = firestore.client()
-
     print('GETTING VALUES...')
 
     url = 'https://www.coindesk.com/coindesk20'
@@ -55,4 +53,4 @@ if __name__ == '__main__':
         categories.append(datos[5].text)
         value_proposition.append(datos[6].text)
 
-    db_store(db, coins, prices, market_caps, total_exchange_volumes, returns_24h, total_supply, categories, value_proposition)
+    db_store(coins, prices, market_caps, total_exchange_volumes, returns_24h, total_supply, categories, value_proposition)
